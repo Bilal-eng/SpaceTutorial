@@ -62,3 +62,11 @@ kotlin {
         }
     }
 }
+
+sqldelight {
+    databases {
+        create("AppDatabase") {
+            packageName.set("com.bilal.spacetutorial.cache")
+        }
+    }
+}
