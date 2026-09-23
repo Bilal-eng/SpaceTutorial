@@ -12,10 +12,10 @@ kotlin {
 }
 dependencies {
     implementation(project(":sharedUI"))
-
     implementation(libs.androidx.activity.compose)
-
     implementation(libs.compose.uiToolingPreview)
+    implementation(libs.koin.androidx.compose)
+
     debugImplementation(libs.compose.uiTooling)
 }
 
