@@ -1,33 +1,49 @@
-import SwiftUI
 import SharedLogic
+import SwiftUI
 
 struct ContentView: View {
-    @State private var showContent = false
+    @ObservedObject private(set) var viewModel: ViewModel
+
     var body: some View {
-        VStack {
-            Button("Click me!") {
-                withAnimation {
-                    showContent = !showContent
-                }
-            }
-
-            if showContent {
-                VStack(spacing: 16) {
-                    Image(systemName: "swift")
-                        .font(.system(size: 200))
-                        .foregroundColor(.accentColor)
-                    Text("SwiftUI: \(Greeting().greet())")
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
+        NavigationView {
+            listView()
+                .navigationBarTitle("Space Launches")
+                .navigationBarItems(
+                    trailing:
+                        Button("Reload") {
+                            self.viewModel.loadLaunches(forceReload: true)
+                        }
+                )
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding()
+    }
+
+    private func listView() -> AnyView {
+        switch viewModel.launches {
+        case .loading:
+            return AnyView(Text("Loading...").multilineTextAlignment(.center))
+        case .result(let launches):
+            return AnyView(
+                List(launches) { launch in
+                    RocketLaunchRow(rocketLaunch: launch)
+                }
+            )
+        case .error(let description):
+            return AnyView(Text(description).multilineTextAlignment(.center))
+        }
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+extension ContentView {
+    enum LoadableLaunches {
+        case loading
+        case result([RocketLaunch])
+        case error(String)
+    }
+
+    @MainActor
+    class ViewModel: ObservableObject {
+        @Published var launches = LoadableLaunches.loading
     }
 }
+
+extension RocketLaunch: Identifiable { }
